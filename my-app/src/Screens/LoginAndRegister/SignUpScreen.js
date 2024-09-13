@@ -20,7 +20,7 @@ const SignUpScreen = () => {
           // Navigate to SignIn screen after successful sign-up
           navigation.navigate('SignIn');
         } else {
-          ShowToast('error', res.data.message);
+          ShowToast('error', res.data.data);
         }
       })
       .catch((err) => {
@@ -70,7 +70,7 @@ const SignUpScreen = () => {
 
         <View style={styles.signInRedirectContainer}>
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-            <Text>Have an account? <Text style={styles.redirectButton}>Sign In</Text></Text>
+            <Text>Have an account? <Text>Sign In</Text></Text>
           </TouchableOpacity>
         </View>
       </View>
