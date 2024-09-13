@@ -2,9 +2,16 @@ import express from 'express';
 import mongoose from "mongoose"
 import bcrypt from 'bcryptjs'
 import { User } from './model/UserDetails.js'
+import cors from 'cors'
+import jwt from "jsonwebtoken";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
+
+
+const JWT_SECRET =
+  "hvdvay6ert72839289()aiyg8t87qt72393293883uhefiuh78ttq3ifi78272jdsds039[]]pou89ywe";
 
 mongoose.connect('mongodb+srv://akhiljose:QLeXvX9q96D9m2mo@carapp.ntg3p.mongodb.net/?retryWrites=true&w=majority&appName=CarAPP')
         .then(() => console.log('connected to database'))
@@ -51,9 +58,12 @@ app.post("/login-user", async (req, res) => {
   }
 
   if (await bcrypt.compare(password, oldUser.password)) {
+    const token = jwt.sign({ email: oldUser.email }, JWT_SECRET);
+    console.log(token);
     if (res.status(201)) {
       return res.send({
         status: "ok",
+        data: token,
       });
     } else {
       return res.send({ error: "error" });
@@ -62,7 +72,9 @@ app.post("/login-user", async (req, res) => {
 });
 
 app.post("/userdata", async (req, res) => {
+  const { token } = req.body;
   try {
+    const user = jwt.verify(token, JWT_SECRET);
     const useremail = user.email;
 
     User.findOne({ email: useremail }).then((data) => {
@@ -73,27 +85,27 @@ app.post("/userdata", async (req, res) => {
   }
 });
 
-// app.post("/update-user", async (req, res) => {
-//   const { name, email, mobile, image, gender, profession } = req.body;
-//   console.log(req.body);
-//   try {
-//     await User.updateOne(
-//       { email: email },
-//       {
-//         $set: {
-//           name,
-//           mobile,
-//           image,
-//           gender,
-//           profession,
-//         },
-//       }
-//     );
-//     res.send({ status: "Ok", data: "Updated" });
-//   } catch (error) {
-//     return res.send({ error: error });
-//   }
-// });
+app.post("/updateuser", async (req, res) => {
+  const { name, email} = req.body;
+  console.log(req.body);
+  try {
+    await User.updateOne(
+      { email: email },
+      {
+        $set: {
+          name,
+          mobile,
+          image,
+          gender,
+          profession,
+        },
+      }
+    );
+    res.send({ status: "Ok", data: "Updated" });
+  } catch (error) {
+    return res.send({ error: error });
+  }
+});
 
 app.get("/get-all-user", async (req, res) => {
   try {

@@ -2,24 +2,37 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import axios from 'axios';
 import { ShowToast } from '../../components/Toast.js';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const navigation = useNavigation();
+
   const handleSignIn = () => {
+
     ShowToast('info', 'Processing your sign-in...');
-    axios.post('http://192.168.225.103:5001/login', { email, password })
+    axios.post('http://192.168.225.103:5001/login-user', { email, password })
       .then((res) => {
-        if (res.data.message === "User already exists!!") {
+        if (res.data.message === "User doesn't exists!!") {
           ShowToast('error', res.data.message);
-        } else {
-          ShowToast('success', res.data.message);
+        } 
+        else {          
+          ShowToast('success', "Welcome!!");
+          AsyncStorage.setItem("token",res.data.data)
+          AsyncStorage.setItem('isLoggedIn',JSON.stringify(true))
+          navigation.navigate('Home');
         }
       })
       .catch((err) => {
         ShowToast('error', "ERROR has occurred");
       });
+  };
+
+  const handleSignUpNavigation = () => {
+    navigation.navigate('SignUp'); // Navigate to the SignUp screen
   };
 
   return (
@@ -44,6 +57,11 @@ export default function SignInScreen() {
         />
         <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
           <Text style={styles.signInText}>Sign In</Text>
+        </TouchableOpacity>
+
+        {/* Add the SignUp navigation text */}
+        <TouchableOpacity onPress={handleSignUpNavigation} style={styles.signUpWrapper}>
+          <Text>Don't have an account? <Text>Sign Up</Text></Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -71,7 +89,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 150,
     resizeMode: 'cover',
-    marginBottom: 20, // Add spacing between image and form elements
+    marginBottom: 20, 
   },
   label: {
     fontSize: 16,
@@ -82,17 +100,18 @@ const styles = StyleSheet.create({
   },
   emailInput: {
     height: 40,
-    borderColor: '#420475',
+    borderColor: 'grey',
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
     borderRadius: 10,
     width: '100%',
-    color: '#05375a',
+    color: 'black',
+    text:"bold"
   },
   passwordInput: {
     height: 40,
-    borderColor: '#420475',
+    borderColor: 'grey',
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
@@ -113,4 +132,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  signUpWrapper: {
+    marginTop: 20,
+  },
+
+
 });
