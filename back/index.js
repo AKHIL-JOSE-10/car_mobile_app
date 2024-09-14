@@ -54,7 +54,7 @@ app.post("/login-user", async (req, res) => {
   const oldUser = await User.findOne({ email: email });
 
   if (!oldUser) {
-    return res.send({ data: "User doesn't exists!!" });
+    return res.json({ message: "User doesn't exists!!" });
   }
 
   if (await bcrypt.compare(password, oldUser.password)) {

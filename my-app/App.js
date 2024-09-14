@@ -41,6 +41,7 @@ const StackNav = () => {
         }
       }} />
       <Stack.Screen name="SignIn" component={SignInScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
     </Stack.Navigator>

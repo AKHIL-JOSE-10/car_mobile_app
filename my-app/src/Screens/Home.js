@@ -159,7 +159,7 @@ return (
                   {userData.profession == '' ||
                   userData.profession == undefined ||
                   userData.profession == null
-                    ? ''
+                    ? 'Driver'
                     : userData.profession}
                 </Text>
               </View>

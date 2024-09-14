@@ -1,80 +1,185 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import axios from 'axios';
 import { ShowToast } from '../../components/Toast.js';
 import { useNavigation } from '@react-navigation/native';
+import Feather from 'react-native-vector-icons/Feather';
+import Error from 'react-native-vector-icons/MaterialIcons';
 
 const SignUpScreen = () => {
   const [name, setName] = useState('');
+  const [nameVerify, setNameVerify] = useState(false);
   const [email, setEmail] = useState('');
+  const [emailVerify, setEmailVerify] = useState(false);
   const [mobile, setMobile] = useState('');
+  const [mobileVerify, setMobileVerify] = useState(false);
   const [password, setPassword] = useState('');
+  const [passwordVerify, setPasswordVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
+  function handleName(e) {
+    const nameVar = e.nativeEvent.text;
+    setName(nameVar);
+    setNameVerify(/^[A-Za-z][A-Za-z\s]*$/.test(nameVar) && nameVar.length > 1);
+  }
+
+  function handleEmail(e) {
+    const emailVar = e.nativeEvent.text;
+    setEmail(emailVar);
+    setEmailVerify(/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(emailVar));
+  }
+
+  function handleMobile(e) {
+    const mobileVar = e.nativeEvent.text;
+    setMobile(mobileVar);
+    setMobileVerify(/[6-9]{1}[0-9]{9}/.test(mobileVar));
+  }
+
+  function handlePassword(e) {
+    const passwordVar = e.nativeEvent.text;
+    setPassword(passwordVar);
+    setPasswordVerify(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(passwordVar));
+  }
+
   const handleSignUp = () => {
+    if (!name || !nameVerify) {
+      ShowToast('error', 'Please enter a valid name.');
+      return;
+    }
+    if (!email || !emailVerify) {
+      ShowToast('error', 'Please enter a valid email address.');
+      return;
+    }
+    if (!mobile || !mobileVerify) {
+      ShowToast('error', 'Please enter a valid mobile number.');
+      return;
+    }
+    if (!password || !passwordVerify) {
+      ShowToast('error', 'Please enter a valid password.');
+      return;
+    }
+
     ShowToast('info', 'Processing your sign-up...');
     axios.post('http://192.168.225.103:5001/register', { name, email, mobile, password })
       .then((res) => {
         if (res.data.status === "ok") {
-          ShowToast('success', res.data.data);
-          // Navigate to SignIn screen after successful sign-up
+          ShowToast('success', 'Registration successful');
           navigation.navigate('SignIn');
         } else {
           ShowToast('error', res.data.data);
         }
       })
       .catch((err) => {
-        ShowToast('error', "ERROR has occurred");
+        ShowToast('error', "An error occurred");
       });
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.formWrapper}>
-        <Image source={require('../../../assets/6.jpg')} style={styles.image} />
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.textInput}
-          value={name}
-          onChangeText={(text) => setName(text)}
-          placeholder="Enter your name"
-        />
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.textInput}
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-          placeholder="Enter your email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <Text style={styles.label}>Mobile Number</Text>
-        <TextInput
-          style={styles.textInput}
-          value={mobile}
-          onChangeText={(text) => setMobile(text)}
-          placeholder="Enter your mobile number"
-          keyboardType="phone-pad"
-        />
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.textInput}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-          placeholder="Enter your password"
-          secureTextEntry
-        />
-        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <View style={styles.container}>
+        <View style={styles.formWrapper}>
+          <Image source={require('../../../assets/6.jpg')} style={styles.image} />
 
-        <View style={styles.signInRedirectContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-            <Text>Have an account? <Text>Sign In</Text></Text>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Name</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.textInput, { paddingRight: 40 }]}
+                value={name}
+                onChange={handleName}
+                placeholder="Enter your name"
+              />
+              {name.length > 0 && (nameVerify ? (
+                <Feather name="check-circle" color="green" size={20} style={styles.icon} />
+              ) : (
+                <Error name="error" color="red" size={20} style={styles.icon} />
+              ))}
+            </View>
+            {!nameVerify && name.length > 0 && (
+              <Text style={styles.errorText}>Name should start with an alphabet and be more than 1 character.</Text>
+            )}
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Email</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.textInput, { paddingRight: 40 }]}
+                value={email}
+                onChange={handleEmail}
+                placeholder="Enter your email"
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              {email.length > 0 && (emailVerify ? (
+                <Feather name="check-circle" color="green" size={20} style={styles.icon} />
+              ) : (
+                <Error name="error" color="red" size={20} style={styles.icon} />
+              ))}
+            </View>
+            {!emailVerify && email.length > 0 && (
+              <Text style={styles.errorText}>Enter a valid email address.</Text>
+            )}
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Mobile Number</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.textInput, { paddingRight: 40 }]}
+                value={mobile}
+                onChange={handleMobile}
+                placeholder="Enter your mobile number"
+                keyboardType="phone-pad"
+                maxLength={10}
+              />
+              {mobile.length > 0 && (mobileVerify ? (
+                <Feather name="check-circle" color="green" size={20} style={styles.icon} />
+              ) : (
+                <Error name="error" color="red" size={20} style={styles.icon} />
+              ))}
+            </View>
+            {!mobileVerify && mobile.length > 0 && (
+              <Text style={styles.errorText}>Phone number should start with 6-9 and be 10 digits long.</Text>
+            )}
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter your password"
+                style={styles.textInput}
+                onChange={handlePassword}
+                secureTextEntry={showPassword}
+                value={password}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.icon}>
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  color={passwordVerify ? 'green' : 'red'}
+                  size={20}
+                />
+              </TouchableOpacity>
+            </View>
+            {!passwordVerify && password.length > 0 && (
+              <Text style={styles.errorText}>Uppercase, Lowercase, Number and 6 or more characters.</Text>
+            )}
+          </View>
+
+          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+            <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
+
+          <View style={styles.signInRedirectContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+              <Text>Have an account? <Text>Sign In</Text></Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -85,6 +190,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
     padding: 16,
+    marginTop: 10
   },
   formWrapper: {
     width: '100%',
@@ -108,15 +214,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     width: '100%',
   },
+  inputWrapper: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  inputContainer: {
+    position: 'relative',
+  },
   textInput: {
     height: 40,
     borderColor: 'grey',
     borderWidth: 1,
-    marginBottom: 16,
     paddingHorizontal: 8,
     borderRadius: 10,
     width: '100%',
     color: 'black',
+  },
+  icon: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+  },
+  errorText: {
+    marginLeft: 0,
+    color: 'red',
   },
   signUpButton: {
     width: '70%',
@@ -132,14 +253,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   signInRedirectContainer: {
-    flexDirection: 'row',
-    marginTop: 16,
-  },
-  redirectButton: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#420475',
-    marginLeft: 5,
+    marginTop: 20,
   },
 });
 

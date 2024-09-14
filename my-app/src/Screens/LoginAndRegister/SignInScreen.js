@@ -17,7 +17,7 @@ export default function SignInScreen() {
     axios.post('http://192.168.225.103:5001/login-user', { email, password })
       .then((res) => {
         if (res.data.message === "User doesn't exists!!") {
-          ShowToast('error', res.data.message);
+          ShowToast('error', "couldn't Login");
         } 
         else {          
           ShowToast('success', "Welcome!!");

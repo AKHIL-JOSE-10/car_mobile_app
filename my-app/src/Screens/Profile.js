@@ -22,7 +22,7 @@ function ProfileScreen(props) {
     if (userData) {
       setName(userData.name || '');
       setEmail(userData.email || '');
-      setPassword('*******');
+      setPassword('');
       setMobile(userData.mobile || '')
     }
   }, [userData]);
@@ -41,17 +41,18 @@ function ProfileScreen(props) {
 
     axios.post('http://192.168.225.103:5001/updateuser', { name, email, password, mobile })
       .then((res) => {
-        ShowToast('success', "Profile updated successfully!");
+        ShowToast('success', "Profile updated successfully, please refresh!!");
         navigation.navigate('Home');
       })
       .catch((err) => {
-        ShowToast('error', "Couldnt update the Profile");
+        ShowToast('error', "Couldn't update the Profile");
       });
   };
 
   return (
+    <ScrollView>
     <View style={profileStyles.profileContainer}>
-      <ScrollView>
+      
         <View style={{ alignItems: "center" }}>
           <Image
             source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOK_bYaHApfSgOyEnMnpx9T3Kc_CjvFzaydg&s" }}
@@ -84,7 +85,7 @@ function ProfileScreen(props) {
           <Text style={profileStyles.label}>Password:</Text>
           <TextInput
             style={profileStyles.inputBox}
-            value={password}
+            placeholder='******'
             onChangeText={(text) => setPassword(text)}
             secureTextEntry={true} // Make the input secure for passwords
           />
@@ -105,8 +106,9 @@ function ProfileScreen(props) {
         <TouchableOpacity style={profileStyles.updateButton} onPress={handleUpdate}>
           <Text style={profileStyles.buttonText}>Update</Text>
         </TouchableOpacity>
-      </ScrollView>
+      
     </View>
+    </ScrollView>
   );
 }
 
@@ -122,6 +124,7 @@ const profileStyles = StyleSheet.create({
     width: 200,
     borderRadius: 100,
     marginBottom: 5,
+    marginTop: 10
   },
   inputGroup: {
     marginBottom: 20,
@@ -130,7 +133,7 @@ const profileStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#555',
     fontSize: 16,
-    marginBottom: 6,
+    marginBottom: 5,
   },
   inputBox: {
     backgroundColor: "#f0f0f0",
