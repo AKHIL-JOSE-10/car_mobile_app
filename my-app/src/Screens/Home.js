@@ -1,16 +1,6 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  BackHandler,
-  Alert,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Image, BackHandler, Alert, RefreshControl } from 'react-native';
+import { Avatar } from 'react-native-paper';
 import React from 'react';
-import {Avatar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Check from 'react-native-vector-icons/Feather';
 import Back from 'react-native-vector-icons/Ionicons';
@@ -26,9 +16,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
+
+
 const Home = (props) => {
 
 const [userData,setUserData]=useState('')
+const [refreshing, setRefreshing] = useState(false)
+
 
 const handleBackPress = ()=>{
   Alert.alert(
@@ -69,9 +63,27 @@ const getData = async ()=>{
 
 }
 
+const handleRefresh = async () => {
+  setRefreshing(true);
+  await new Promise(resolve => setTimeout(resolve, 1000)); 
+  await getData(); 
+  setRefreshing(false); 
+};
+
 
 return (
-  <ScrollView showsVerticalScrollIndicator={false}>
+  <ScrollView
+  showsVerticalScrollIndicator={false}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={handleRefresh}
+      colors={['#ff9500']} // Change the color of the spinner
+      progressBackgroundColor="#ffffff" // Background color of the spinner's track
+      style={styles.refreshControl}
+    />
+  }
+>
     <View>
       <View style={{position: 'relative'}}>
 
@@ -166,6 +178,7 @@ return (
             </View>
           </View>
         </View>
+        
       </View>
     </ScrollView>
   );
@@ -378,6 +391,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     fontWeight: '600',
+  },
+  refreshControl: {
+    marginTop: 90, // Adjust this value based on how much you want to pull down
   },
 });
 

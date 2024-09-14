@@ -86,22 +86,13 @@ app.post("/userdata", async (req, res) => {
 });
 
 app.post("/updateuser", async (req, res) => {
-  const { name, email} = req.body;
+  const {name, email, password, mobile} = req.body;
   console.log(req.body);
   try {
     await User.updateOne(
-      { email: email },
-      {
-        $set: {
-          name,
-          mobile,
-          image,
-          gender,
-          profession,
-        },
-      }
+      { email: email },{$set: {name, email, password, mobile} }
     );
-    res.send({ status: "Ok", data: "Updated" });
+    return res.send({ status: "Ok", data: "Updated" });
   } catch (error) {
     return res.send({ error: error });
   }

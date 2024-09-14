@@ -6,6 +6,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useEffect, useState} from 'react';
+import axios from 'axios'
 
 const DrawerList = [
     { icon: 'home-outline', label: 'Home', navigateTo: 'Home' },
@@ -42,6 +44,20 @@ const DrawerItems = () => {
 
 function DrawerContent(props) {
     const navigation = useNavigation();
+    const [userData,setUserData]=useState('')
+
+    useEffect( ()=>{
+        getData();
+      },[])
+      
+      const getData = async ()=>{
+        const token = await AsyncStorage.getItem("token")
+        axios.post('http://192.168.225.103:5001/userdata', {token:token})
+        .then((res)=>{ 
+          setUserData(res.data.data)
+        })
+      
+      }
 
     const signOut =()=>{
         AsyncStorage.setItem('isLoggedIn','')
@@ -64,9 +80,9 @@ function DrawerContent(props) {
                                     style={styles.avatar}
                                 />
                                 <View style={styles.userInfoText}>
-                                    <Title style={styles.title}>Adarsh</Title>
+                                    <Title style={styles.title}>{userData.name}</Title>
                                     <Text style={styles.caption} numberOfLines={1}>
-                                        adarshthakur210@gmail.com
+                                    {userData.email}
                                     </Text>
                                 </View>
                             </View>
