@@ -26,10 +26,10 @@ const SignUpScreen = () => {
 
   function handleEmail(e) {
     const emailVar = e.nativeEvent.text;
+    const emailPattern = /^[\w.%+-]+@gmail\.com$/;
     setEmail(emailVar);
-    setEmailVerify(/^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(emailVar));
+    setEmailVerify(emailPattern.test(emailVar));
   }
-
   function handleMobile(e) {
     const mobileVar = e.nativeEvent.text;
     setMobile(mobileVar);
@@ -61,7 +61,7 @@ const SignUpScreen = () => {
     }
 
     ShowToast('info', 'Processing your sign-up...');
-    axios.post('http://192.168.225.103:5001/register', { name, email, mobile, password })
+    axios.post('http://192.168.3.103:5001/register', { name, email, mobile, password })
       .then((res) => {
         if (res.data.status === "ok") {
           ShowToast('success', 'Registration successful');

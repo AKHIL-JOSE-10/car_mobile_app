@@ -11,25 +11,26 @@ export default function SignInScreen() {
 
   const navigation = useNavigation();
 
-  const handleSignIn = () => {
+const handleSignIn = () => {
+  ShowToast('info', 'Processing your sign-in...');
+  axios.post('http://192.168.3.103:5001/login-user', { email, password })
+    .then((res) => {
+      if (res.status === 200 && res.data.status === "ok") {
+        ShowToast('success', "Welcome!!");
+        AsyncStorage.setItem("token", res.data.data);
+        AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+        navigation.navigate('Home');
+      } else if (res.status === 404 || res.status === 401) {
+        ShowToast('error', res.data.message || "Invalid credentials");
+      } else {
+        ShowToast('error', "Unexpected response from server");
+      }
+    })
+    .catch((err) => {
+      ShowToast('error', "ERROR has occurred");
+    });
+};
 
-    ShowToast('info', 'Processing your sign-in...');
-    axios.post('http://192.168.225.103:5001/login-user', { email, password })
-      .then((res) => {
-        if (res.data.message === "User doesn't exists!!") {
-          ShowToast('error', "couldn't Login");
-        } 
-        else {          
-          ShowToast('success', "Welcome!!");
-          AsyncStorage.setItem("token",res.data.data)
-          AsyncStorage.setItem('isLoggedIn',JSON.stringify(true))
-          navigation.navigate('Home');
-        }
-      })
-      .catch((err) => {
-        ShowToast('error', "ERROR has occurred");
-      });
-  };
 
   const handleSignUpNavigation = () => {
     navigation.navigate('SignUp'); // Navigate to the SignUp screen

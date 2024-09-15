@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowToast } from '../components/Toast.js';
@@ -11,6 +11,7 @@ function ProfileScreen(props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('*******');
   const [mobile, setMobile] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -22,15 +23,15 @@ function ProfileScreen(props) {
     if (userData) {
       setName(userData.name || '');
       setEmail(userData.email || '');
-      setPassword('');
-      setMobile(userData.mobile || '')
+      setPassword(''); // Resetting password field
+      setMobile(userData.mobile || '');
     }
   }, [userData]);
 
   const getData = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const res = await axios.post('http://192.168.225.103:5001/userdata', { token: token });
+      const res = await axios.post('http://192.168.3.103:5001/userdata', { token: token });
       setUserData(res.data.data);
     } catch (err) {
       console.error("Error fetching data", err);
@@ -38,8 +39,7 @@ function ProfileScreen(props) {
   };
 
   const handleUpdate = () => {
-
-    axios.post('http://192.168.225.103:5001/updateuser', { name, email, password, mobile })
+    axios.post('http://192.168.3.103:5001/updateuser', { name, email, password, mobile })
       .then((res) => {
         ShowToast('success', "Profile updated successfully, please refresh!!");
         navigation.navigate('Home');
@@ -49,10 +49,22 @@ function ProfileScreen(props) {
       });
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getData(); // Refresh user data
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView>
-    <View style={profileStyles.profileContainer}>
-      
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
+    >
+      <View style={profileStyles.profileContainer}>
         <View style={{ alignItems: "center" }}>
           <Image
             source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOK_bYaHApfSgOyEnMnpx9T3Kc_CjvFzaydg&s" }}
@@ -91,8 +103,7 @@ function ProfileScreen(props) {
           />
         </View>
 
-
-        {/* mobile field */}
+        {/* Mobile field */}
         <View style={profileStyles.inputGroup}>
           <Text style={profileStyles.label}>Mobile:</Text>
           <TextInput
@@ -106,8 +117,7 @@ function ProfileScreen(props) {
         <TouchableOpacity style={profileStyles.updateButton} onPress={handleUpdate}>
           <Text style={profileStyles.buttonText}>Update</Text>
         </TouchableOpacity>
-      
-    </View>
+      </View>
     </ScrollView>
   );
 }
@@ -165,6 +175,5 @@ const profileStyles = StyleSheet.create({
     fontSize: 18,
   },
 });
-
 
 export default ProfileScreen;

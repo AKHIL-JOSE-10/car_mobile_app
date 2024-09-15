@@ -54,20 +54,18 @@ app.post("/login-user", async (req, res) => {
   const oldUser = await User.findOne({ email: email });
 
   if (!oldUser) {
-    return res.json({ message: "User doesn't exists!!" });
+    return res.status(404).json({ message: "User doesn't exist!!" });
   }
 
   if (await bcrypt.compare(password, oldUser.password)) {
     const token = jwt.sign({ email: oldUser.email }, JWT_SECRET);
     console.log(token);
-    if (res.status(201)) {
-      return res.send({
-        status: "ok",
-        data: token,
-      });
-    } else {
-      return res.send({ error: "error" });
-    }
+    return res.status(200).send({
+      status: "ok",
+      data: token,
+    });
+  } else {
+    return res.status(401).send({ error: "Invalid credentials" });
   }
 });
 

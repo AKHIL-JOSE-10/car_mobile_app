@@ -52,7 +52,7 @@ function DrawerContent(props) {
       
       const getData = async ()=>{
         const token = await AsyncStorage.getItem("token")
-        axios.post('http://192.168.225.103:5001/userdata', {token:token})
+        axios.post('http://192.168.3.103:5001/userdata', {token:token})
         .then((res)=>{ 
           setUserData(res.data.data)
         })
