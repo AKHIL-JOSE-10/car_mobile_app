@@ -88,7 +88,7 @@ app.post("/updateuser", async (req, res) => {
   console.log(req.body);
   try {
     await User.updateOne(
-      { email: email },{$set: {name, email, password, mobile} }
+      { email: email },{$set: {name, email:email, password, mobile} }
     );
     return res.send({ status: "Ok", data: "Updated" });
   } catch (error) {

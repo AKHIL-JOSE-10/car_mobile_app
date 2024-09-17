@@ -50,18 +50,28 @@ useFocusEffect(
   })
 )
 
+useFocusEffect(
+  React.useCallback(() => {
+    getData();
+  }, [])
+);
+
 useEffect( ()=>{
   getData();
 },[])
 
-const getData = async ()=>{
-  const token = await AsyncStorage.getItem("token")
-  axios.post('http://192.168.3.103:5001/userdata', {token:token})
-  .then((res)=>{ 
-    setUserData(res.data.data)
-  })
-
-}
+const getData = async () => {
+  const token = await AsyncStorage.getItem("token");
+  if (token) {
+    axios.post('http://192.168.3.103:5001/userdata', { token })
+      .then((res) => {
+        setUserData(res.data.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
+  }
+};
 
 const handleRefresh = async () => {
   setRefreshing(true);
