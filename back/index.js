@@ -20,27 +20,25 @@ mongoose.connect('mongodb+srv://akhiljose:QLeXvX9q96D9m2mo@carapp.ntg3p.mongodb.
 
 
 
-app.get("/", (req, res) => {
-  res.send({ status: "Started" });
-});
-
 app.post("/register", async (req, res) => {
-  const { name, email, mobile, password } = req.body;
+  const { name, email, mobile} = req.body;
   console.log(req.body);
 
+  // Check if user already exists
   const oldUser = await User.findOne({ email: email });
 
   if (oldUser) {
-    return res.send({ data: "User already exists!!" });
+    return res.send({ status: "error", data: "User already exists!!" });
   }
-  const encryptedPassword = await bcrypt.hash(password, 10);
+
+  let encryptedPassword = null; // Initialize encryptedPassword as null
 
   try {
     await User.create({
       name: name,
       email: email,
       mobile,
-      password: encryptedPassword,
+      password: encryptedPassword, // Save as null if password is not provided
     });
     res.send({ status: "ok", data: "User Created" });
   } catch (error) {
@@ -51,21 +49,33 @@ app.post("/register", async (req, res) => {
 app.post("/login-user", async (req, res) => {
   const { email, password } = req.body;
   console.log(req.body);
-  const oldUser = await User.findOne({ email: email });
 
-  if (!oldUser) {
-    return res.status(404).json({ message: "User doesn't exist!!" });
-  }
+  try {
+    // Find user by email
+    const oldUser = await User.findOne({ email: email });
 
-  if (await bcrypt.compare(password, oldUser.password)) {
-    const token = jwt.sign({ email: oldUser.email }, JWT_SECRET);
-    console.log(token);
-    return res.status(200).send({
-      status: "ok",
-      data: token,
-    });
-  } else {
-    return res.status(401).send({ error: "Invalid credentials" });
+    if (!oldUser) {
+      return res.status(404).json({ message: "User doesn't exist!!" });
+    }
+
+    // Check if password is null
+    if (!oldUser.password) {
+      return res.status(400).json({ message: "Password has not been set for this user. Please contact admin." });
+    }
+
+    // Compare provided password with hashed password
+    const isMatch = await bcrypt.compare(password, oldUser.password);
+
+    if (isMatch) {
+      const token = jwt.sign({ email: oldUser.email }, JWT_SECRET);
+      console.log(token);
+      return res.status(200).send({ status: "ok", data: token, isadmin: oldUser.isadmin });
+    } else {
+      return res.status(401).send({ error: "Invalid credentials" });
+    }
+  } catch (error) {
+    console.error('Error during login:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
@@ -102,6 +112,44 @@ app.get("/get-all-user", async (req, res) => {
     res.send({ status: "Ok", data: data });
   } catch (error) {
     return res.send({ error: error });
+  }
+});
+
+
+app.get('/get-user-details/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ data: user });
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/update-password', async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ status: 'ok', message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ status: 'error', message: 'An error occurred' });
   }
 });
 

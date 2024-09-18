@@ -9,7 +9,10 @@ const UserDetailSchema = new mongoose.Schema(
     // image:String,
     // gender:String,
     // profession:String,
-    // userType:String
+     isadmin:{
+      type:Boolean,
+      default:false,
+     }
     
   }
 );

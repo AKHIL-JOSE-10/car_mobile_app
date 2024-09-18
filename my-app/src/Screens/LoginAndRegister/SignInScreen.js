@@ -19,7 +19,14 @@ const handleSignIn = () => {
         ShowToast('success', "Welcome!!");
         AsyncStorage.setItem("token", res.data.data);
         AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
-        navigation.navigate('Home');
+        AsyncStorage.setItem('userType', JSON.stringify(res.data.isadmin));
+        if(res.data.isadmin){
+          navigation.navigate('AdminHome');
+        }
+        else{ 
+          navigation.navigate('Home');
+        }
+
       } else if (res.status === 404 || res.status === 401) {
         ShowToast('error', res.data.message || "Invalid credentials");
       } else {
@@ -27,7 +34,7 @@ const handleSignIn = () => {
       }
     })
     .catch((err) => {
-      ShowToast('error', "ERROR has occurred");
+      ShowToast('error', "Invalid credentials");
     });
 };
 

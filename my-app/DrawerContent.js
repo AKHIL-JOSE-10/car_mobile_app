@@ -57,6 +57,7 @@ function DrawerContent(props) {
         AsyncStorage.setItem('isLoggedIn', '');
         AsyncStorage.setItem('token', '');
         navigation.navigate('SignIn');
+        AsyncStorage.setItem('userType', '');
     };
 
     return (

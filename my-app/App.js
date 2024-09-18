@@ -3,6 +3,8 @@ import { Text, StyleSheet, View } from 'react-native';
 import SignUpScreen from './src/Screens/LoginAndRegister/SignUpScreen';
 import SignInScreen from './src/Screens/LoginAndRegister/SignInScreen.js';
 import { Home } from './src/Screens/Home';
+import UserDetails from './src/Screens/Admin/AdminUsers.js';
+import AdminHome from './src/Screens/Admin/adminHome.js';
 import ProfileScreen from './src/Screens/Profile.js';
 import NotificationScreen from './src/Screens/NotificationScreen.js';
 import Toast from 'react-native-toast-message'; // Import Toast
@@ -56,9 +58,19 @@ const DrawerNav = () => {
       headerShown: false
     }}>
       <Drawer.Screen name='Home' component={StackNav} />
-
-
     </Drawer.Navigator>
+  )
+}
+
+const AdminStack=()=>{
+  const Stack = createNativeStackNavigator();
+
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="AdminHome" options={{ headerShown: false }} component={AdminHome} />
+      <Stack.Screen name="SignIn" options={{ headerShown: false }} component={LoginNav} />
+      <Stack.Screen  name="UserDetails"  component={UserDetails} />
+    </Stack.Navigator>
   )
 }
 
@@ -76,6 +88,7 @@ return (
   <Stack.Screen name="SignIn" options={{ title: 'CarApp' }} component={SignInScreen} />
   <Stack.Screen name="SignUp" options={{ title: 'CarApp' }} component={SignUpScreen} />
   <Stack.Screen name="Home" options={{ headerShown: false }} component={DrawerNav} />
+  <Stack.Screen name="AdminHome" options={{ headerShown: false }} component={AdminStack} />
 </Stack.Navigator>
 )
 
@@ -85,10 +98,13 @@ const App = () => {
 
   const Stack = createNativeStackNavigator();
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userType, setUserType] = useState(false)
+
   async function getData() {
     const data = await AsyncStorage.getItem('isLoggedIn')
-    console.log(data)
+    const userType1 = await AsyncStorage.getItem('userType')
     setIsLoggedIn(data)
+    setUserType(userType1)
   }
 
   useEffect(() => {
@@ -98,7 +114,13 @@ const App = () => {
   return (
 
     <NavigationContainer>
-        {isLoggedIn ? <DrawerNav/> : <LoginNav/>}
+        {isLoggedIn && userType=="true" ?(
+           <AdminStack/>
+         ) :isLoggedIn? (
+         <DrawerNav/>)
+          :(
+             <LoginNav/>
+            )}
         <Toast/>
     </NavigationContainer>
   )

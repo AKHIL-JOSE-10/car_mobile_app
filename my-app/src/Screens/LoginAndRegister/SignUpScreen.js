@@ -13,8 +13,6 @@ const SignUpScreen = () => {
   const [emailVerify, setEmailVerify] = useState(false);
   const [mobile, setMobile] = useState('');
   const [mobileVerify, setMobileVerify] = useState(false);
-  const [password, setPassword] = useState('');
-  const [passwordVerify, setPasswordVerify] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
@@ -30,16 +28,11 @@ const SignUpScreen = () => {
     setEmail(emailVar);
     setEmailVerify(emailPattern.test(emailVar));
   }
+  
   function handleMobile(e) {
     const mobileVar = e.nativeEvent.text;
     setMobile(mobileVar);
     setMobileVerify(/[6-9]{1}[0-9]{9}/.test(mobileVar));
-  }
-
-  function handlePassword(e) {
-    const passwordVar = e.nativeEvent.text;
-    setPassword(passwordVar);
-    setPasswordVerify(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(passwordVar));
   }
 
   const handleSignUp = () => {
@@ -55,16 +48,12 @@ const SignUpScreen = () => {
       ShowToast('error', 'Please enter a valid mobile number.');
       return;
     }
-    if (!password || !passwordVerify) {
-      ShowToast('error', 'Please enter a valid password.');
-      return;
-    }
 
     ShowToast('info', 'Processing your sign-up...');
-    axios.post('http://192.168.3.103:5001/register', { name, email, mobile, password })
+    axios.post('http://192.168.3.103:5001/register', { name, email, mobile })
       .then((res) => {
         if (res.data.status === "ok") {
-          ShowToast('success', 'Registration successful');
+          ShowToast('success', 'Registration successful. Password will be sent after validation.');
           navigation.navigate('SignIn');
         } else {
           ShowToast('error', res.data.data);
@@ -142,29 +131,6 @@ const SignUpScreen = () => {
             </View>
             {!mobileVerify && mobile.length > 0 && (
               <Text style={styles.errorText}>Phone number should start with 6-9 and be 10 digits long.</Text>
-            )}
-          </View>
-
-          <View style={styles.inputWrapper}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder="Enter your password"
-                style={styles.textInput}
-                onChange={handlePassword}
-                secureTextEntry={showPassword}
-                value={password}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.icon}>
-                <Feather
-                  name={showPassword ? "eye" : "eye-off"}
-                  color={passwordVerify ? 'green' : 'red'}
-                  size={20}
-                />
-              </TouchableOpacity>
-            </View>
-            {!passwordVerify && password.length > 0 && (
-              <Text style={styles.errorText}>Uppercase, Lowercase, Number and 6 or more characters.</Text>
             )}
           </View>
 
