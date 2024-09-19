@@ -55,12 +55,12 @@ app.post("/login-user", async (req, res) => {
     const oldUser = await User.findOne({ email: email });
 
     if (!oldUser) {
-      return res.status(404).json({ message: "User doesn't exist!!" });
+      return res.json({ message: "User doesn't exist!!" });
     }
 
     // Check if password is null
     if (!oldUser.password) {
-      return res.status(400).json({ message: "Password has not been set for this user. Please contact admin." });
+      return res.json({ message: "Invalid credentials" });
     }
 
     // Compare provided password with hashed password
@@ -69,13 +69,13 @@ app.post("/login-user", async (req, res) => {
     if (isMatch) {
       const token = jwt.sign({ email: oldUser.email }, JWT_SECRET);
       console.log(token);
-      return res.status(200).send({ status: "ok", data: token, isadmin: oldUser.isadmin });
+      return res.json({ status: "ok", data: token, isadmin: oldUser.isadmin });
     } else {
-      return res.status(401).send({ error: "Invalid credentials" });
+      return res.json({ message: "Invalid credentials" });
     }
   } catch (error) {
-    console.error('Error during login:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    
+    return res.json({ message: 'Internal server error' });
   }
 });
 

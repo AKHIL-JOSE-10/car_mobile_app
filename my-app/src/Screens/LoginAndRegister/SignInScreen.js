@@ -11,33 +11,37 @@ export default function SignInScreen() {
 
   const navigation = useNavigation();
 
-const handleSignIn = () => {
-  ShowToast('info', 'Processing your sign-in...');
-  axios.post('http://192.168.3.103:5001/login-user', { email, password })
-    .then((res) => {
-      if (res.status === 200 && res.data.status === "ok") {
-        ShowToast('success', "Welcome!!");
-        AsyncStorage.setItem("token", res.data.data);
-        AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
-        AsyncStorage.setItem('userType', JSON.stringify(res.data.isadmin));
-        if(res.data.isadmin){
-          navigation.navigate('AdminHome');
+  const handleSignIn =  () => {
+    ShowToast('info', 'Processing your sign-in...');
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    
+    axios.post('http://192.168.190.103:5001/login-user', { email: trimmedEmail, password: trimmedPassword })
+      .then(async (res) => {
+        if (res.data.status === "ok") {
+          ShowToast('success', "Welcome!!");
+          await AsyncStorage.setItem("token", res.data.data);
+          await AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+          await AsyncStorage.setItem('userType', JSON.stringify(res.data.isadmin));
+          console.log(res.data.isadmin)
+          if(res.data.isadmin){
+            navigation.navigate('AdminHome');
+          }
+          else{ 
+            navigation.navigate('Home');
+          }
+  
+        } 
+        else {
+          ShowToast('error', res.data.message );
         }
-        else{ 
-          navigation.navigate('Home');
-        }
-
-      } else if (res.status === 404 || res.status === 401) {
-        ShowToast('error', res.data.message || "Invalid credentials");
-      } else {
-        ShowToast('error', "Unexpected response from server");
-      }
-    })
-    .catch((err) => {
-      ShowToast('error', "Invalid credentials");
-    });
-};
-
+      })
+      .catch((err) => {
+        ShowToast('error', "Invalid credentials");
+      });
+  };
+  
+  
 
   const handleSignUpNavigation = () => {
     navigation.navigate('SignUp'); // Navigate to the SignUp screen

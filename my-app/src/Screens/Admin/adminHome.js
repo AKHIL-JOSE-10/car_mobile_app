@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, Text, View, Pressable, FlatList, ActivityIndicator, SafeAreaView, BackHandler, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, Entypo, Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 function AdminHome() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
   const navigation = useNavigation();
 
   const handleBackPress = () => {
@@ -39,14 +40,16 @@ function AdminHome() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://192.168.3.103:5001/get-all-user');
+      const res = await axios.get('http://192.168.190.103:5001/get-all-user');
       // Filter out users with isadmin true
       const filteredUsers = res.data.data.filter(user => !user.isadmin);
       setUsers(filteredUsers);
       setLoading(false);
+      setRefreshing(false); // Stop refreshing after data is fetched
     } catch (error) {
       console.error('Error fetching user data:', error);
       setLoading(false);
+      setRefreshing(false); // Stop refreshing on error
     }
   };
 
@@ -69,8 +72,13 @@ function AdminHome() {
     navigation.navigate('UserDetails', { user });
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchUsers();
+  }, []);
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.safeArea}>
       <LinearGradient colors={["#7F7FD5", "#E9E4F0"]} style={styles.gradient}>
         <View style={styles.container}>
           {/* Top Bar */}
@@ -94,7 +102,12 @@ function AdminHome() {
                 keyExtractor={(item) => item._id.toString()}
                 renderItem={({ item }) => (
                   <Pressable style={styles.reportItem} onPress={() => handlePressUser(item)}>
-                    <View style={styles.reportIcon}>
+                    <View
+                      style={[
+                        styles.reportIcon,
+                        { backgroundColor: item.password ? '#28a745' : '#dc3545' } // Icon color based on password status
+                      ]}
+                    >
                       <Ionicons name="person-outline" size={24} color="white" />
                     </View>
                     <Text style={styles.reportText}>{item.name}</Text>
@@ -103,6 +116,8 @@ function AdminHome() {
                     </View>
                   </Pressable>
                 )}
+                onRefresh={onRefresh}
+                refreshing={refreshing}
               />
             )}
           </View>
@@ -113,6 +128,9 @@ function AdminHome() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1, // Ensures SafeAreaView takes up the full screen
+  },
   gradient: {
     flex: 1,
   },
@@ -151,7 +169,8 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   usersContainer: {
-    backgroundColor: "white",
+    flex: 1, // Ensures this container takes up the remaining space
+    backgroundColor: "#f0f0f0", // Light grey for a clean, complementary look
     padding: 10,
     borderRadius: 10,
     elevation: 5,
@@ -170,12 +189,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   reportIcon: {
-    backgroundColor: "#34495e",
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
   },
   reportText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "600",
     marginLeft: 10,
     color: "#ecf0f1",

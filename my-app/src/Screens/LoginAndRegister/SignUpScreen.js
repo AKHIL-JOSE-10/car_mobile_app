@@ -50,7 +50,7 @@ const SignUpScreen = () => {
     }
 
     ShowToast('info', 'Processing your sign-up...');
-    axios.post('http://192.168.3.103:5001/register', { name, email, mobile })
+    axios.post('http://192.168.190.103:5001/register', { name, email, mobile })
       .then((res) => {
         if (res.data.status === "ok") {
           ShowToast('success', 'Registration successful. Password will be sent after validation.');

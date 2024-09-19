@@ -7,7 +7,7 @@ import UserDetails from './src/Screens/Admin/AdminUsers.js';
 import AdminHome from './src/Screens/Admin/adminHome.js';
 import ProfileScreen from './src/Screens/Profile.js';
 import NotificationScreen from './src/Screens/NotificationScreen.js';
-import Toast from 'react-native-toast-message'; // Import Toast
+import Toast from 'react-native-toast-message';
 import { NavigationContainer, useNavigation, DrawerActions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import 'react-native-gesture-handler';
@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const StackNav = () => {
   const Stack = createNativeStackNavigator();
   const navigation = useNavigation()
-
+  
   return (
     <Stack.Navigator screenOptions={{
       headerStyle: {
@@ -89,7 +89,7 @@ return (
   <Stack.Screen name="SignUp" options={{ title: 'CarApp' }} component={SignUpScreen} />
   <Stack.Screen name="Home" options={{ headerShown: false }} component={DrawerNav} />
   <Stack.Screen name="AdminHome" options={{ headerShown: false }} component={AdminStack} />
-</Stack.Navigator>
+ </Stack.Navigator>
 )
 
 }
@@ -145,4 +145,5 @@ const App = () => {
     },
   });
 }
+
 export default App;

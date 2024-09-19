@@ -32,7 +32,7 @@ function ProfileScreen(props) {
   const getData = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const res = await axios.post('http://192.168.3.103:5001/userdata', { token });
+      const res = await axios.post('192.168.190.103:5001/userdata', { token });
       setUserData(res.data.data);
     } catch (err) {
       console.error("Error fetching data", err);
@@ -72,7 +72,7 @@ function ProfileScreen(props) {
 
   const handleUpdate = () => {
     if (validateFields()) {
-      axios.post('http://192.168.3.103:5001/updateuser', { name, email, password, mobile })
+      axios.post('http://192.168.190.103:5001/updateuser', { name, email, password, mobile })
         .then((res) => {
           ShowToast('success', "Profile updated successfully!!");
           navigation.navigate('Home');

@@ -13,7 +13,7 @@ function UserDetails({ route }) {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const res = await axios.get(`http://192.168.3.103:5001/get-user-details/${user._id}`);
+        const res = await axios.get(`http://192.168.190.103:5001/get-user-details/${user._id}`);
         setUserData(res.data.data);
         setNumber(res.data.data.mobile)
         setLoading(false);
@@ -33,13 +33,13 @@ function UserDetails({ route }) {
   const sendSMS = async () => {
     const randomNumber = generateRandomNumber();
     const newPassword = `Car${randomNumber}`; // Generate new password
-    const message = `Your new password is ${newPassword}`; // Message with new password
+    const message = `Account verified , Your password is ${newPassword}`; // Message with new password
   
     try {
       // Send SMS
       await SMS.sendSMSAsync(number, message);
         // Update password on the server
-        const updatePasswordResponse = await axios.post('http://192.168.3.103:5001/update-password', {
+        const updatePasswordResponse = await axios.post('http://192.168.190.103:5001/update-password', {
           userId: user._id,
           newPassword,
         });
@@ -76,9 +76,19 @@ function UserDetails({ route }) {
               <FontAwesome name="phone" size={21} color="#6200EE" style={styles.icon} />
               <Text style={styles.detailText}>{userData.mobile}</Text>
             </View>
-            <TouchableOpacity style={styles.button} onPress={sendSMS}>
-              <Text style={styles.buttonText}>Send Message</Text>
+
+            {/* Display 'Verified' and tick mark if password is not null */}
+            {userData.password ? (
+              <View style={styles.verifiedContainer}>
+                <FontAwesome name="check-circle" size={28} color="green" style={styles.verifiedIcon} />
+                <Text style={styles.verifiedText}>Verified</Text>
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.verifyButton} onPress={sendSMS}>
+              <FontAwesome name="shield" size={20} color="#FFF" style={styles.verifyIcon} />
+              <Text style={styles.verifyButtonText}>Verify Account</Text>
             </TouchableOpacity>
+            )}
           </View>
         )
       )}
@@ -123,12 +133,33 @@ const styles = StyleSheet.create({
     marginRight: 15,
     textAlign: 'center',
     overflow: 'hidden',
-    color:'white'
+    color: 'white',
   },
   detailText: {
     fontSize: 16,
     color: '#333',
     fontWeight: '600',
+  },
+  verifiedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8FFE8', 
+    padding: 10,
+    marginTop: 20, // Add space between the last detail and "Verified"
+    borderRadius: 10,
+    width: '100%', // Make it take the full width
+    alignSelf: 'center',
+    borderColor: 'green',
+    borderWidth: 1,
+  },
+  verifiedIcon: {
+    marginRight: 10,
+  },
+  verifiedText: {
+    fontSize: 14,
+    color: 'green',
+    fontWeight: '700',
   },
   button: {
     marginTop: 20,
@@ -138,12 +169,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   buttonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
   },
+  verifyButton: {
+    marginTop: 20,
+    backgroundColor: '#FF5328', // Use a distinct color like Tomato Red
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row', // Align icon and text in a row
+    width: '100%',
+  },
+  verifyButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+    marginLeft: 10, // Add space between icon and text
+  },
+  verifyIcon: {
+    marginRight: 10,
+  }
 });
 
 export default UserDetails;
